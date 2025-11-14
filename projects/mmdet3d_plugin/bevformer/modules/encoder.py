@@ -190,8 +190,13 @@ class BEVFormerEncoder(TransformerLayerSequence):
         ref_2d = self.get_reference_points(
             bev_h, bev_w, dim='2d', bs=bev_query.size(1), device=bev_query.device, dtype=bev_query.dtype)
 
+        print('ref_3d', ref_3d.shape)
+        print('ref_2d', ref_2d.shape)
+
         reference_points_cam, bev_mask = self.point_sampling(
             ref_3d, self.pc_range, kwargs['img_metas'])
+
+        print('reference_points_cam', reference_points_cam.shape)
 
         # bug: this code should be 'shift_ref_2d = ref_2d.clone()', we keep this bug for reproducing our results in paper.
         shift_ref_2d = ref_2d.clone()
@@ -439,7 +444,7 @@ class MM_BEVFormerLayer(MyCustomBaseTransformerLayer):
         assert len(operation_order) == 6
         assert set(operation_order) == set(
             ['self_attn', 'norm', 'cross_attn', 'ffn'])
-        self.cross_model_weights = torch.nn.Parameter(torch.tensor(0.5), requires_grad=True) 
+        self.cross_model_weights = torch.nn.Parameter(torch.tensor(0.5), requires_grad=True)
         if lidar_cross_attn_layer:
             self.lidar_cross_attn_layer = build_attention(lidar_cross_attn_layer)
             # self.cross_model_weights+=1

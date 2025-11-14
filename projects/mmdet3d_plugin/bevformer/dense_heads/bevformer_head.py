@@ -122,7 +122,7 @@ class BEVFormerHead(DETRHead):
                 network, each is a 5D-tensor with shape
                 (B, N, C, H, W).
             prev_bev: previous bev featues
-            only_bev: only compute BEV features with encoder. 
+            only_bev: only compute BEV features with encoder.
         Returns:
             all_cls_scores (Tensor): Outputs from the classification head, \
                 shape [nb_dec, bs, num_query, cls_out_channels]. Note \
@@ -131,14 +131,20 @@ class BEVFormerHead(DETRHead):
                 head with normalized coordinate format (cx, cy, w, l, cz, h, theta, vx, vy). \
                 Shape [nb_dec, bs, num_query, 9].
         """
+        for ix in range(len(mlvl_feats)):
+            print('ccccccccccccccccc ', ix, mlvl_feats[ix].shape)
         bs, num_cam, _, _, _ = mlvl_feats[0].shape
         dtype = mlvl_feats[0].dtype
         object_query_embeds = self.query_embedding.weight.to(dtype)
+        print('object_query_embeds ', object_query_embeds.shape)
         bev_queries = self.bev_embedding.weight.to(dtype)
+        print('bev_queries ', bev_queries.shape)
 
         bev_mask = torch.zeros((bs, self.bev_h, self.bev_w),
                                device=bev_queries.device).to(dtype)
+        print('bev_mask ', bev_mask.shape)
         bev_pos = self.positional_encoding(bev_mask).to(dtype)
+        print('bev_pos ', bev_pos.shape)
 
         if only_bev:  # only use encoder to obtain BEV features, TODO: refine the workaround
             return self.transformer.get_bev_features(
@@ -641,7 +647,7 @@ class BEVFormerHead_GroupDETR(BEVFormerHead):
         all_bbox_preds = preds_dicts['all_bbox_preds']
         enc_cls_scores = preds_dicts['enc_cls_scores']
         enc_bbox_preds = preds_dicts['enc_bbox_preds']
-        assert enc_cls_scores is None and enc_bbox_preds is None 
+        assert enc_cls_scores is None and enc_bbox_preds is None
 
         num_dec_layers = len(all_cls_scores)
         device = gt_labels_list[0].device

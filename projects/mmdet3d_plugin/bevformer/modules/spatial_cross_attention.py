@@ -71,7 +71,7 @@ class SpatialCrossAttention(BaseModule):
     def init_weight(self):
         """Default initialization for Parameters of Module."""
         xavier_init(self.output_proj, distribution='uniform', bias=0.)
-    
+
     @force_fp32(apply_to=('query', 'key', 'value', 'query_pos', 'reference_points_cam'))
     def forward(self,
                 query,
@@ -132,6 +132,20 @@ class SpatialCrossAttention(BaseModule):
             query = query + query_pos
 
         bs, num_query, _ = query.size()
+        print('query:', query.size())
+        print('key:', key.size())
+        print('value:', value.size())
+        if residual is not None:
+            print('residual:', residual.size())
+        if query_pos is not None:
+            print('query_pos:', query_pos.size())
+        if key_padding_mask is not None:
+            print('key_padding_mask:', key_padding_mask.size())
+        print('reference_points:', reference_points.size())
+        print('spatial_shapes:', spatial_shapes.size())
+        print('reference_points_cam:', reference_points_cam.size())
+        print('bev_mask:', bev_mask.size())
+        print('level_start_index:', level_start_index)
 
         D = reference_points_cam.size(3)
         indexes = []
@@ -145,9 +159,9 @@ class SpatialCrossAttention(BaseModule):
             [bs, self.num_cams, max_len, self.embed_dims])
         reference_points_rebatch = reference_points_cam.new_zeros(
             [bs, self.num_cams, max_len, D, 2])
-        
+
         for j in range(bs):
-            for i, reference_points_per_img in enumerate(reference_points_cam):   
+            for i, reference_points_per_img in enumerate(reference_points_cam):
                 index_query_per_img = indexes[i]
                 queries_rebatch[j, i, :len(index_query_per_img)] = query[j, index_query_per_img]
                 reference_points_rebatch[j, i, :len(index_query_per_img)] = reference_points_per_img[j, index_query_per_img]

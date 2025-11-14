@@ -68,7 +68,7 @@ class BEVFormer(MVXTwoStageDetector):
         """Extract features of images."""
         B = img.size(0)
         if img is not None:
-            
+
             # input_shape = img.shape[-2:]
             # # update real input shape of each single img
             # for img_meta in img_metas:
@@ -104,7 +104,7 @@ class BEVFormer(MVXTwoStageDetector):
         """Extract features from images and points."""
 
         img_feats = self.extract_img_feat(img, img_metas, len_queue=len_queue)
-        
+
         return img_feats
 
 
@@ -154,7 +154,7 @@ class BEVFormer(MVXTwoStageDetector):
             return self.forward_train(**kwargs)
         else:
             return self.forward_test(**kwargs)
-    
+
     def obtain_history_bev(self, imgs_queue, img_metas_list):
         """Obtain history BEV features iteratively. To save GPU memory, gradients are not calculated.
         """
@@ -173,6 +173,7 @@ class BEVFormer(MVXTwoStageDetector):
                 img_feats = [each_scale[:, i] for each_scale in img_feats_list]
                 prev_bev = self.pts_bbox_head(
                     img_feats, img_metas, prev_bev, only_bev=True)
+                import pdb; pdb.set_trace()
             self.train()
             return prev_bev
 
@@ -213,18 +214,24 @@ class BEVFormer(MVXTwoStageDetector):
         Returns:
             dict: Losses of different branches.
         """
-        
+
         len_queue = img.size(1)
+        print('len_queue', len_queue)
+        print('img  ', img.shape)
         prev_img = img[:, :-1, ...]
         img = img[:, -1, ...]
 
         prev_img_metas = copy.deepcopy(img_metas)
+        import pdb; pdb.set_trace()
         prev_bev = self.obtain_history_bev(prev_img, prev_img_metas)
+        print('prev_bev', prev_bev.shape)
 
         img_metas = [each[len_queue-1] for each in img_metas]
         if not img_metas[0]['prev_bev_exists']:
             prev_bev = None
         img_feats = self.extract_feat(img=img, img_metas=img_metas)
+        for ix in range(len(img_feats)):
+            print('img_feats', ix, img_feats[ix].shape)
         losses = dict()
         losses_pts = self.forward_pts_train(img_feats, gt_bboxes_3d,
                                             gt_labels_3d, img_metas,

@@ -117,6 +117,8 @@ class PerceptionTransformer(BaseModule):
 
         bs = mlvl_feats[0].size(0)
         bev_queries = bev_queries.unsqueeze(1).repeat(1, bs, 1)
+        print('bev_queries', bev_queries.shape)
+        print('bev_pos', bev_pos.shape)
         bev_pos = bev_pos.flatten(2).permute(2, 0, 1)
 
         # obtain rotation angle and shift with ego motion
@@ -182,6 +184,14 @@ class PerceptionTransformer(BaseModule):
 
         feat_flatten = feat_flatten.permute(
             0, 2, 1, 3)  # (num_cam, H*W, bs, embed_dims)
+
+        print('bev_queries ', bev_queries.shape)
+        print('feat_flatten ', feat_flatten.shape)
+        print('bev_pos ', bev_pos.shape)
+        print('spatial_shapes ', spatial_shapes.shape)
+        print('level_start_index ', level_start_index.shape)
+        # print('prev_bev ', prev_bev.shape)
+        print('shift ', shift.shape)
 
         bev_embed = self.encoder(
             bev_queries,
